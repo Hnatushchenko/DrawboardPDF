@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DrawboardPDFApp.Services;
+using DrawboardPDFApp.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,9 +31,20 @@ namespace DrawboardPDFApp
         /// </summary>
         public App()
         {
+            Services = ConfigureServices();
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }
+
+        /// <summary>
+        /// Gets the current <see cref="App"/> instance in use
+        /// </summary>
+        public new static App Current => (App)Application.Current;
+
+        /// <summary>
+        /// Gets the <see cref="IServiceProvider"/> instance to resolve application services.
+        /// </summary>
+        public IServiceProvider Services { get; }
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
@@ -95,6 +109,18 @@ namespace DrawboardPDFApp
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        /// <summary>
+        /// Configures the services for the application.
+        /// </summary>
+        private static IServiceProvider ConfigureServices()
+        {
+            var services = new ServiceCollection();
+
+            services.AddSingleton<IPdfFileOpenPicker, PdfFileOpenPicker>();
+
+            return services.BuildServiceProvider();
         }
     }
 }
