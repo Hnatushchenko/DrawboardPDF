@@ -1,0 +1,80 @@
+﻿<Page
+    x:Class="DrawboardPDFApp.Views.HomeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DrawboardPDFApp.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <Style x:Key="TransparentBackgroundButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0 50 0 30">
+            <TextBlock x:Uid="Title" Style="{ThemeResource TitleTextBlockStyle}" FontWeight="Bold"/>
+            <TextBlock x:Uid="Subtitle" Style="{ThemeResource SubtitleTextBlockStyle}" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+            <Border CornerRadius="15" BorderThickness="3" BorderBrush="Black" Margin="0 0 20 0" >
+                <Button x:Name="OpenPdfFromDeviceButton" Style="{StaticResource TransparentBackgroundButtonStyle}" Command="{x:Bind ViewModel.OpenPdfFromDeviceCommand}" VerticalAlignment="Stretch" PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited">
+                    <StackPanel Orientation="Horizontal" Padding="10" >
+                        <SymbolIcon Symbol="NewFolder" Margin="0 0 15 0"/>
+                        <TextBlock x:Uid="Open from device" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Border>
+            <Border CornerRadius="15" BorderThickness="3" BorderBrush="Black" >
+                <Button Style="{StaticResource TransparentBackgroundButtonStyle}" VerticalAlignment="Stretch" PointerEntered="Button_PointerEntered" PointerExited="Button_PointerExited" >
+                    <StackPanel Orientation="Horizontal" Padding="10">
+                        <SymbolIcon Symbol="Remote" Margin="0 0 15 0"/>
+                        <TextBlock x:Uid="Upload doc" />
+                    </StackPanel>
+                </Button>
+            </Border>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" Margin="0 30 0 20">
+            <HyperlinkButton Tag="All Files" Margin="0 0 25 0" Foreground="Black">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Uid="All Files" />
+                    <TextBlock Text=" (" />
+                    <TextBlock Text="{x:Bind ViewModel.AllFilesNumber}" />
+                    <TextBlock Text=")" />
+                </StackPanel>
+            </HyperlinkButton>
+            <HyperlinkButton Tag="Drawboard Cloud" Foreground="Black">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Uid="Drawboard Cloud" />
+                    <TextBlock Text=" (" />
+                    <TextBlock Text="{x:Bind ViewModel.CloudFilesNumber}" />
+                    <TextBlock Text=")" />
+                </StackPanel>
+            </HyperlinkButton>
+        </StackPanel>
+        <Frame Grid.Row="3" Grid.Column="1">
+            
+        </Frame>
+    </Grid>
+</Page>
