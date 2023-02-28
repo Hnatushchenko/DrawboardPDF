@@ -5,10 +5,17 @@
     xmlns:local="using:DrawboardPDFApp"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    
 
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <muxc:TabView x:Name="TabView" Grid.Row="0" AddTabButtonCommand="{x:Bind ViewModel.AddTabCommand}" >
+            
+        </muxc:TabView>
     </Grid>
 </Page>

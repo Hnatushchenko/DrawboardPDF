@@ -1,5 +1,6 @@
 ﻿using DrawboardPDFApp.Services;
 using DrawboardPDFApp.ViewModels;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,8 +35,16 @@ namespace DrawboardPDFApp.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = new HomeViewModel(new NavigationService(Frame));
-            base.OnNavigatedTo(e);
+            if (e.Parameter is TabView tabView)
+            {
+                var tabViewService = new TabViewService(tabView);
+                ViewModel = new HomeViewModel(tabViewService, new PdfFileOpenPicker());
+                base.OnNavigatedTo(e);
+            }
+            else
+            {
+                throw new ArgumentException("Parameter should be of type TabView");
+            }
         }
 
         private void Button_PointerEntered(object sender, PointerRoutedEventArgs e)

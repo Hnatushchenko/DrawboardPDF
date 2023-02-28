@@ -2,47 +2,33 @@
 using CommunityToolkit.Mvvm.Input;
 using DrawboardPDFApp.Services;
 using DrawboardPDFApp.Views;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Xml.Linq;
 using Windows.Storage.Pickers;
-using Windows.UI.Xaml.Controls;
 
 namespace DrawboardPDFApp.ViewModels
 {
-    public class HomeViewModel : ObservableObject
+    public class MainPageViewModel : ObservableObject
     {
         private readonly ITabViewService tabViewService;
         private readonly IPdfFileOpenPicker pdfFileOpenPicker;
 
-        public HomeViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker)
+        public MainPageViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker)
         {
+            AddTabCommand = new AsyncRelayCommand(AddTab);
             this.tabViewService = tabViewService;
             this.pdfFileOpenPicker = pdfFileOpenPicker;
-            OpenPdfFromDeviceCommand = new AsyncRelayCommand(OpenPdfFromDeviceAsync);
         }
 
-        private int allFilesNumber;
-        public int AllFilesNumber
-        {
-            get => allFilesNumber;
-            set => SetProperty(ref allFilesNumber, value);
-        }
+        public ICommand AddTabCommand { get; }
 
-        private int cloudFilesNumber;
-        public int CloudFilesNumber
-        {
-            get => cloudFilesNumber;
-            set => SetProperty(ref cloudFilesNumber, value);
-        }
-
-        public IAsyncRelayCommand OpenPdfFromDeviceCommand { get; }
-
-        private async Task OpenPdfFromDeviceAsync()
+        private async Task AddTab()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
 

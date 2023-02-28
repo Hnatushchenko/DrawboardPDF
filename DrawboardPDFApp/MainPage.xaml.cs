@@ -1,10 +1,17 @@
-﻿using System;
+﻿using DrawboardPDFApp.Services;
+using DrawboardPDFApp.ViewModels;
+using DrawboardPDFApp.Views;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,6 +32,19 @@ namespace DrawboardPDFApp
         public MainPage()
         {
             this.InitializeComponent();
+        }
+
+        public MainPageViewModel ViewModel { get; set; }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var tabViewService = new TabViewService(TabView);
+            var pdfFileOpenService = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
+            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService);
+
+            tabViewService.AddTab("Home", typeof(HomeView), TabView);
+
+            base.OnNavigatedTo(e);
         }
     }
 }
