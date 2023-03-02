@@ -1,4 +1,5 @@
-﻿using DrawboardPDFApp.Services;
+﻿using DrawboardPDFApp.Repository;
+using DrawboardPDFApp.Services;
 using DrawboardPDFApp.ViewModels;
 using DrawboardPDFApp.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +41,8 @@ namespace DrawboardPDFApp
         {
             var tabViewService = new TabViewService(TabView);
             var pdfFileOpenService = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
-            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService);
+            var applicationContext = App.Current.Services.GetRequiredService<IApplicationContext>();
+            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, applicationContext);
 
             tabViewService.AddTab("Home", typeof(HomeView), TabView);
 

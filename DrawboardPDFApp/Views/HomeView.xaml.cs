@@ -1,5 +1,7 @@
-﻿using DrawboardPDFApp.Services;
+﻿using DrawboardPDFApp.Repository;
+using DrawboardPDFApp.Services;
 using DrawboardPDFApp.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
@@ -38,7 +40,9 @@ namespace DrawboardPDFApp.Views
             if (e.Parameter is TabView tabView)
             {
                 var tabViewService = new TabViewService(tabView);
-                ViewModel = new HomeViewModel(tabViewService, new PdfFileOpenPicker());
+                var pdfFileOpenPicker = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
+                var openedFilesHistoryKeeper = App.Current.Services.GetRequiredService<IOpenedFilesHistoryKeeper>();
+                ViewModel = new HomeViewModel(tabViewService, pdfFileOpenPicker, openedFilesHistoryKeeper);
                 base.OnNavigatedTo(e);
             }
             else

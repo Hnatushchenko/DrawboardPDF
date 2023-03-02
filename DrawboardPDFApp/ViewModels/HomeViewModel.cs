@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DrawboardPDFApp.Models;
+using DrawboardPDFApp.Repository;
 using DrawboardPDFApp.Services;
 using DrawboardPDFApp.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,12 +21,18 @@ namespace DrawboardPDFApp.ViewModels
     {
         private readonly ITabViewService tabViewService;
         private readonly IPdfFileOpenPicker pdfFileOpenPicker;
+        private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
 
-        public HomeViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker)
+        public HomeViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper)
         {
             this.tabViewService = tabViewService;
             this.pdfFileOpenPicker = pdfFileOpenPicker;
+            this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
             OpenPdfFromDeviceCommand = new AsyncRelayCommand(OpenPdfFromDeviceAsync);
+
+            var openedPdfFilesHistory = openedFilesHistoryKeeper.GetAllPdfFilesAsync().Result;
+            OpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
+            AllFilesNumber = OpenedPdfFilesHistory.Count;
         }
 
         private int allFilesNumber;
@@ -45,11 +54,25 @@ namespace DrawboardPDFApp.ViewModels
         private async Task OpenPdfFromDeviceAsync()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
-
-            if (file != null)
+            if (file is null)
             {
-                tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
+                return;
+            }
+            
+            tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
+            if (await openedFilesHistoryKeeper.RecordExistsAsync(file))
+            {
+                await openedFilesHistoryKeeper.UpdateAsync(file);
+               
+            }
+            else
+            {
+                var fileInfo = await openedFilesHistoryKeeper.AddRecordAsync(file);
+                OpenedPdfFilesHistory.Add(fileInfo);
+                AllFilesNumber = OpenedPdfFilesHistory.Count;
             }
         }
+
+        public ObservableCollection<PdfFileInfo> OpenedPdfFilesHistory { get; }
     }
 }

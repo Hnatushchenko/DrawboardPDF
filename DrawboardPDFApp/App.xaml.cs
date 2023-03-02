@@ -1,5 +1,7 @@
-﻿using DrawboardPDFApp.Services;
+﻿using DrawboardPDFApp.Repository;
+using DrawboardPDFApp.Services;
 using DrawboardPDFApp.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -116,9 +119,17 @@ namespace DrawboardPDFApp
         /// </summary>
         private static IServiceProvider ConfigureServices()
         {
+            var databasePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "DrawboardPDFDatabase.db");
+
             var services = new ServiceCollection();
 
             services.AddSingleton<IPdfFileOpenPicker, PdfFileOpenPicker>();
+            services.AddTransient<IOpenedFilesHistoryKeeper, OpenedFilesHistoryKeeper>();
+            services.AddTransient<IPdfCoversService, PdfCoversService>();
+            services.AddDbContext<IApplicationContext, ApplicationContext>(options =>
+            {
+                options.UseSqlite($"Data Source={databasePath}");
+            });
 
             return services.BuildServiceProvider();
         }
