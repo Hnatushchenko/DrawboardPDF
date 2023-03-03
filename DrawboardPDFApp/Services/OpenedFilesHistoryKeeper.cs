@@ -3,10 +3,12 @@ using DrawboardPDFApp.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Appointments;
 using Windows.Data.Pdf;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
@@ -26,23 +28,47 @@ namespace DrawboardPDFApp.Services
         {
             this.applicationContext = applicationContext;
             this.pdfCoversService = pdfCoversService;
+            Records = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(GetPdfFilesHistoryAsObservableAsync());
         }
 
-        public async Task<bool> RecordExistsAsync(StorageFile file)
+        public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; private set; }
+
+        public async Task RecordFileOpeningAsync(StorageFile file)
         {
-            return await applicationContext.OpenedPdfFilesHistory.AnyAsync(fileInfo => fileInfo.Path == file.Path);
+            if (RecordExists(file))
+            {
+                await UpdateAsync(file);
+            }
+            else
+            {
+                await AddRecordAsync(file);
+            }
         }
 
-        public async Task<PdfFileInfo> AddRecordAsync(StorageFile file)
+        public async Task RemoveAsync(Guid id)
+        {
+            var fileToRemove = await applicationContext.OpenedPdfFilesHistory.FirstOrDefaultAsync(x => x.Id == id);
+            applicationContext.OpenedPdfFilesHistory.Remove(fileToRemove);
+            await applicationContext.SaveChangesAsync();
+            var fileInfo = Records.Result.FirstOrDefault(x => x.Id == id);
+            Records.Result.Remove(fileInfo);
+        }
+
+        private bool RecordExists(StorageFile file)
+        {
+            return Records.Result.Any(fileInfo => fileInfo.Path == file.Path);
+        }
+
+        private async Task AddRecordAsync(StorageFile file)
         {
             string coverPath = await pdfCoversService.CreateCoverAsync(file);
             var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.Path);
             applicationContext.OpenedPdfFilesHistory.Add(fileInfo);
             await applicationContext.SaveChangesAsync();
-            return fileInfo;
+            Records.Result.Add(fileInfo);
         }
 
-        public async Task UpdateAsync(StorageFile file)
+        private async Task UpdateAsync(StorageFile file)
         {
             var fileInfo = await applicationContext.OpenedPdfFilesHistory.FirstAsync(info => info.Path == file.Path);
             fileInfo.LastTimeOpened = DateTimeOffset.Now;
@@ -55,11 +81,11 @@ namespace DrawboardPDFApp.Services
             return await applicationContext.OpenedPdfFilesHistory.AsNoTracking().ToListAsync();
         }
 
-        public async Task RemoveAsync(Guid id)
+        private async Task<ObservableCollection<PdfFileInfo>> GetPdfFilesHistoryAsObservableAsync()
         {
-            var fileToRemove = await applicationContext.OpenedPdfFilesHistory.FirstOrDefaultAsync(x => x.Id == id);
-            applicationContext.OpenedPdfFilesHistory.Remove(fileToRemove);
-            await applicationContext.SaveChangesAsync();
+            var openedPdfFilesHistory = await GetAllPdfFilesAsync();
+            var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
+            return observableOpenedPdfFilesHistory;
         }
     }
 }
