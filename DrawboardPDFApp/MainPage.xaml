@@ -14,8 +14,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <muxc:TabView x:Name="TabView" Grid.Row="0" AddTabButtonCommand="{x:Bind ViewModel.AddTabCommand}" >
-            
+        <muxc:TabView x:Name="TabView" Grid.Row="0" AddTabButtonCommand="{x:Bind ViewModel.AddTabCommand}" TabCloseRequested="TabView_TabCloseRequested"  >
+            <muxc:TabViewItem Header="Home" IsClosable="False">
+                <Frame x:Name="HomePageFrame" Loaded="HomePageFrame_Loaded">
+
+                </Frame>
+            </muxc:TabViewItem>
         </muxc:TabView>
     </Grid>
 </Page>

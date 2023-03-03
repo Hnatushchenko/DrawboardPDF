@@ -43,15 +43,17 @@ namespace DrawboardPDFApp
             var pdfFileOpenService = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
             var openedFilesHistoryKeeper = App.Current.Services.GetRequiredService<IOpenedFilesHistoryKeeper>();
             ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, openedFilesHistoryKeeper);
-
-            tabViewService.AddTab("Home", typeof(HomeView), TabView);
-
             base.OnNavigatedTo(e);
         }
 
         private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
             sender.TabItems.Remove(args.Tab);
+        }
+
+        private void HomePageFrame_Loaded(object sender, RoutedEventArgs e)
+        {
+            HomePageFrame.Navigate(typeof(HomeView), TabView);
         }
     }
 }

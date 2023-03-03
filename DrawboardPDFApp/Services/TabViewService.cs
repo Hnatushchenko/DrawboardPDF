@@ -18,16 +18,16 @@ namespace DrawboardPDFApp.Services
             this.tabView = tabView;
         }
 
-        public void AddTab(string header, Type sourcePageType, object parameter)
+        public void AddTab(string header, Type sourcePageType, object pageParameter)
         {
             var newTab = new TabViewItem
             {
-                Header = header
+                Header = header,
             };
 
             Frame frame = new Frame();
             newTab.Content = frame;
-            frame.Navigate(sourcePageType, parameter);
+            frame.Navigate(sourcePageType, pageParameter);
             tabView.TabItems.Add(newTab);
             tabView.SelectedItem = newTab;
         }
