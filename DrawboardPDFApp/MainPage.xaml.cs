@@ -48,5 +48,10 @@ namespace DrawboardPDFApp
 
             base.OnNavigatedTo(e);
         }
+
+        private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+        {
+            sender.TabItems.Remove(args.Tab);
+        }
     }
 }
