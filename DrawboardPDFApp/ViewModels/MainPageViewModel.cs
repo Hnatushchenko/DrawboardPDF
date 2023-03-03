@@ -21,15 +21,15 @@ namespace DrawboardPDFApp.ViewModels
     {
         private readonly ITabViewService tabViewService;
         private readonly IPdfFileOpenPicker pdfFileOpenPicker;
-        private readonly IApplicationContext applicationContext;
+        private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
 
-        public MainPageViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker, IApplicationContext applicationContext)
+        public MainPageViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper)
         {
             AddTabCommand = new AsyncRelayCommand(AddTab);
 
             this.tabViewService = tabViewService;
             this.pdfFileOpenPicker = pdfFileOpenPicker;
-            this.applicationContext = applicationContext;
+            this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
         }
 
         public ICommand AddTabCommand { get; }
@@ -37,11 +37,13 @@ namespace DrawboardPDFApp.ViewModels
         private async Task AddTab()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
-
-            if (file != null)
+            if (file is null)
             {
-                tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
+                return;
             }
+
+            await openedFilesHistoryKeeper.RecordFileOpeningAsync(file);
+            tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
         }
     }
 }

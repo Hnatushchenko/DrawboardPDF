@@ -129,10 +129,13 @@
     <Compile Include="Services\IOpenedFilesHistoryKeeper.cs" />
     <Compile Include="Services\IPdfCoversService.cs" />
     <Compile Include="Services\IPdfFileOpenPicker.cs" />
+    <Compile Include="Services\IPdfOpener.cs" />
     <Compile Include="Services\ITabViewService.cs" />
+    <Compile Include="Services\NotifyTaskCompletion.cs" />
     <Compile Include="Services\OpenedFilesHistoryKeeper.cs" />
     <Compile Include="Services\PdfCoversService.cs" />
     <Compile Include="Services\PdfFileOpenPicker.cs" />
+    <Compile Include="Services\PdfOpener.cs" />
     <Compile Include="Services\TabViewService.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\MainPageViewModel.cs" />

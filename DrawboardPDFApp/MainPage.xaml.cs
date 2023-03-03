@@ -41,8 +41,8 @@ namespace DrawboardPDFApp
         {
             var tabViewService = new TabViewService(TabView);
             var pdfFileOpenService = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
-            var applicationContext = App.Current.Services.GetRequiredService<IApplicationContext>();
-            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, applicationContext);
+            var openedFilesHistoryKeeper = App.Current.Services.GetRequiredService<IOpenedFilesHistoryKeeper>();
+            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, openedFilesHistoryKeeper);
 
             tabViewService.AddTab("Home", typeof(HomeView), TabView);
 

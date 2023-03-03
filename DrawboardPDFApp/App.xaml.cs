@@ -124,8 +124,9 @@ namespace DrawboardPDFApp
             var services = new ServiceCollection();
 
             services.AddSingleton<IPdfFileOpenPicker, PdfFileOpenPicker>();
-            services.AddTransient<IOpenedFilesHistoryKeeper, OpenedFilesHistoryKeeper>();
+            services.AddSingleton<IOpenedFilesHistoryKeeper, OpenedFilesHistoryKeeper>();
             services.AddTransient<IPdfCoversService, PdfCoversService>();
+            services.AddTransient<IPdfOpener, PdfOpener>();
             services.AddDbContext<IApplicationContext, ApplicationContext>(options =>
             {
                 options.UseSqlite($"Data Source={databasePath}");
