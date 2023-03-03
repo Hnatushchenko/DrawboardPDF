@@ -29,10 +29,7 @@ namespace DrawboardPDFApp.ViewModels
             this.pdfFileOpenPicker = pdfFileOpenPicker;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
             OpenPdfFromDeviceCommand = new AsyncRelayCommand(OpenPdfFromDeviceAsync);
-
-            var openedPdfFilesHistory = openedFilesHistoryKeeper.GetAllPdfFilesAsync().Result;
-            OpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
-            AllFilesNumber = OpenedPdfFilesHistory.Count;
+            OpenedPdfFilesHistoryTask = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(LoadPdfFilesHistoryAsObservable());
         }
 
         private int allFilesNumber;
@@ -51,6 +48,13 @@ namespace DrawboardPDFApp.ViewModels
 
         public IAsyncRelayCommand OpenPdfFromDeviceCommand { get; }
 
+        private async Task<ObservableCollection<PdfFileInfo>> LoadPdfFilesHistoryAsObservable()
+        {
+            var openedPdfFilesHistory = await openedFilesHistoryKeeper.GetAllPdfFilesAsync();
+            var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
+            return observableOpenedPdfFilesHistory;
+        }
+
         private async Task OpenPdfFromDeviceAsync()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
@@ -63,16 +67,15 @@ namespace DrawboardPDFApp.ViewModels
             if (await openedFilesHistoryKeeper.RecordExistsAsync(file))
             {
                 await openedFilesHistoryKeeper.UpdateAsync(file);
-               
             }
             else
             {
                 var fileInfo = await openedFilesHistoryKeeper.AddRecordAsync(file);
-                OpenedPdfFilesHistory.Add(fileInfo);
-                AllFilesNumber = OpenedPdfFilesHistory.Count;
+                OpenedPdfFilesHistoryTask.Result.Add(fileInfo);
+                AllFilesNumber = OpenedPdfFilesHistoryTask.Result.Count;
             }
         }
 
-        public ObservableCollection<PdfFileInfo> OpenedPdfFilesHistory { get; }
+        public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> OpenedPdfFilesHistoryTask { get; private set; }
     }
 }

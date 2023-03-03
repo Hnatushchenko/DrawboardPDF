@@ -61,7 +61,7 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Uid="All Files" />
                     <TextBlock Text=" (" />
-                    <TextBlock Text="{x:Bind ViewModel.AllFilesNumber, Mode=OneWay}" />
+                    <TextBlock Text="{x:Bind ViewModel.OpenedPdfFilesHistoryTask.Result.Count, Mode=OneWay}" />
                     <TextBlock Text=")" />
                 </StackPanel>
             </HyperlinkButton>
@@ -74,7 +74,7 @@
                 </StackPanel>
             </HyperlinkButton>
         </StackPanel>
-        <GridView Grid.Row="3" Grid.Column="1" ItemsSource="{x:Bind ViewModel.OpenedPdfFilesHistory}">
+        <GridView Grid.Row="3" Grid.Column="1" ItemsSource="{x:Bind ViewModel.OpenedPdfFilesHistoryTask.Result, Mode=OneWay}">
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="models:PdfFileInfo">
                     <Border Padding="20 20 40 20">
