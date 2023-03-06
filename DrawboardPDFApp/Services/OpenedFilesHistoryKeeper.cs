@@ -12,6 +12,7 @@ using Windows.ApplicationModel.Appointments;
 using Windows.Data.Pdf;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
+using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml.Controls;
@@ -60,9 +61,10 @@ namespace DrawboardPDFApp.Services
         }
 
         private async Task AddRecordAsync(StorageFile file)
-        {
+        {            
             string coverPath = await pdfCoversService.CreateCoverAsync(file);
-            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.Path);
+            string fileToken = StorageApplicationPermissions.FutureAccessList.Add(file);
+            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.DateCreated, file.Path, fileToken);
             applicationContext.OpenedPdfFilesHistory.Add(fileInfo);
             await applicationContext.SaveChangesAsync();
             Records.Result.Add(fileInfo);
