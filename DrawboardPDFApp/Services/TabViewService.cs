@@ -31,5 +31,18 @@ namespace DrawboardPDFApp.Services
             tabView.TabItems.Add(newTab);
             tabView.SelectedItem = newTab;
         }
+
+        public void AddTabOrSelectIfIsOpened(string header, Type sourcePageType, object pageParameter)
+        {
+            var existingTab = tabView.TabItems.Cast<TabViewItem>().FirstOrDefault(tab => tab.Header.ToString() == header);
+            if (existingTab != null)
+            {
+                tabView.SelectedItem = existingTab;
+            }
+            else
+            {
+                AddTab(header, sourcePageType, pageParameter);
+            }
+        }
     }
 }
