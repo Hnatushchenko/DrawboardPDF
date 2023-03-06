@@ -6,6 +6,7 @@ namespace DrawboardPDFApp.Services
     public interface IPdfOpener
     {
         Task OpenExistingFileAsync(StorageFile file);
+        Task OpenExistingFileAsync(string fileToken);
         Task OpenNewFileAsync();
     }
 }

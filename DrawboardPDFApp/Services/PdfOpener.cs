@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.AccessCache;
 
 namespace DrawboardPDFApp.Services
 {
@@ -24,18 +25,22 @@ namespace DrawboardPDFApp.Services
         public async Task OpenNewFileAsync()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
-            if (file is null)
+            if (file != null)
             {
-                return;
+                await OpenExistingFileAsync(file);
             }
-
-            await OpenExistingFileAsync(file);
         }
 
         public async Task OpenExistingFileAsync(StorageFile file)
         {
             await openedFilesHistoryKeeper.RecordFileOpeningAsync(file);
-            tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
+            tabViewService.AddTabOrSelectIfIsOpened(file.DisplayName, typeof(OpenedPdfView), file); 
+        }
+
+        public async Task OpenExistingFileAsync(string fileToken)
+        {
+            var file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(fileToken);
+            await OpenExistingFileAsync(file);
         }
     }
 }
