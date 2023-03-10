@@ -2,6 +2,7 @@
 using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using Microsoft.EntityFrameworkCore;
+//using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,24 +39,26 @@ namespace DrawboardPDFApp.Services
         }
 
         public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; private set; }
+        public ObservableCollection<PdfFileInfo> CloudRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
+        //public ObservableCollection<PdfFileInfo> AllRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
 
         public async Task RecordFileOpeningAsync(StorageFile file, Location location)
         {
-            if (RecordExists(file))
+            if (RecordExistsLocally(file))
             {
-                await UpdateAsync(file);
+                await UpdateAsync(file, location);
             }
             else
             {
-                await AddRecordAsync(file, location);
+                await AddLocalRecordAsync(file);
             }
         }
 
-        public async Task AddRecordIfNotExistAsync(StorageFile file, Location location)
+        public async Task AddLocalRecordIfNotExistAsync(StorageFile file)
         {
-            if (!RecordExists(file))
+            if (!RecordExistsLocally(file))
             {
-                await AddRecordAsync(file, location);
+                await AddLocalRecordAsync(file);
             }
         }
 
@@ -68,27 +71,41 @@ namespace DrawboardPDFApp.Services
             Records.Result.Remove(fileInfo);
         }
 
-        private bool RecordExists(StorageFile file)
+        private bool RecordExistsLocally(StorageFile file)
         {
             return Records.Result.Any(fileInfo => fileInfo.Path == file.Path);
         }
 
-        private async Task AddRecordAsync(StorageFile file, Location location)
+        private async Task AddLocalRecordAsync(StorageFile file)
         {
-            string coverPath = await pdfCoversService.CreateCoverAsync(file);
-            string fileToken = StorageApplicationPermissions.FutureAccessList.Add(file);
-            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.DateCreated, file.Path, fileToken, location);
+            var fileInfo = await CreateRecordAsync(file, Location.Local);
             applicationContext.OpenedPdfFilesHistory.Add(fileInfo);
             await applicationContext.SaveChangesAsync();
             Records.Result.Add(fileInfo);
         }
 
-        private async Task UpdateAsync(StorageFile file)
+        private async Task UpdateAsync(StorageFile file, Location location)
         {
-            var fileInfo = await applicationContext.OpenedPdfFilesHistory.FirstAsync(info => info.Path == file.Path);
-            fileInfo.LastTimeOpened = DateTimeOffset.Now;
-            await applicationContext.SaveChangesAsync();
-            // TODO: Update on UI as well;
+            if (location == Location.Local)
+            {
+                var fileInfo = await applicationContext.OpenedPdfFilesHistory.FirstAsync(info => info.Path == file.Path);
+                fileInfo.LastTimeOpened = DateTimeOffset.Now;
+                await applicationContext.SaveChangesAsync();
+            }
+            else if (location == Location.Cloud)
+            {
+                var fileInfo = CloudRecords.First(info => info.DisplayName == file.Path);
+                fileInfo.LastTimeOpened = DateTimeOffset.Now;
+                // TODO: Push updates to the cloud.
+            }
+        }
+
+        private async Task<PdfFileInfo> CreateRecordAsync(StorageFile file, Location location)
+        {
+            string coverPath = await pdfCoversService.CreateCoverAsync(file);
+            string fileToken = StorageApplicationPermissions.FutureAccessList.Add(file);
+            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.DateCreated, file.Path, fileToken, location);
+            return fileInfo;
         }
 
         private async Task<List<PdfFileInfo>> GetAllPdfFilesAsync()
@@ -108,8 +125,30 @@ namespace DrawboardPDFApp.Services
             var pdfFiles = await cloudStorage.GetAllPdfFilesAsync();
             foreach (StorageFile file in pdfFiles)
             {
-                await AddRecordIfNotExistAsync(file, Location.Cloud);
+                await AddCloudRecordIfNotExistAsync(file);
             }
+        }
+
+        public void ClearCloudRecords()
+        {
+            CloudRecords.Clear();
+        }
+
+        private bool RecordExistsInCloud(StorageFile file)
+        {
+            var exists = CloudRecords.Any(record => record.DisplayName == file.Name);
+            return exists;
+        }
+
+        public async Task AddCloudRecordIfNotExistAsync(StorageFile file)
+        {
+            if (RecordExistsInCloud(file))
+            {
+                return;
+            }
+
+            var fileInfo = await CreateRecordAsync(file, Location.Cloud);
+            CloudRecords.Add(fileInfo);
         }
     }
 }
