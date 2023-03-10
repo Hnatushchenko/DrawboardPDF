@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DrawboardPDFApp.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace DrawboardPDFApp.Models
 {
     public class PdfFileInfo
     {
-        public PdfFileInfo(string firstPageImagePath, string displayName, DateTimeOffset lastTimeOpened, DateTimeOffset dateCreated, string path, string fileToken)
+        public PdfFileInfo(string firstPageImagePath, string displayName, DateTimeOffset lastTimeOpened, DateTimeOffset dateCreated, string path, string fileToken, Location location)
         {
             FirstPageImagePath = firstPageImagePath;
             DisplayName = displayName;
@@ -16,6 +17,7 @@ namespace DrawboardPDFApp.Models
             DateCreated = dateCreated;
             Path = path;
             FileToken = fileToken;
+            Location = location;
         }
 
         public Guid Id { get; set; }
@@ -25,5 +27,6 @@ namespace DrawboardPDFApp.Models
         public DateTimeOffset DateCreated { get; set; }
         public string Path { get; set; }
         public string FileToken { get; set; }
+        public Location Location { get; set; }
     }
 }
