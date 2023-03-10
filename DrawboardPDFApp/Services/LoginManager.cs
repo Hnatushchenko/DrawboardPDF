@@ -38,12 +38,11 @@ namespace DrawboardPDFApp.Services
 
         public async Task LogoutAsync()
         {
-            var authResult = await authenticationResultProvider.GetAuthenticationResultAsync();
-            string accessToken = authResult.AccessToken;
-            HttpClient httpClient = httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            HttpResponseMessage response = await httpClient.GetAsync("https://login.microsoftonline.com/common/oauth2/v2.0/logout");
+            await ClearTokenCacheAsync();
+        }
 
+        private async Task ClearTokenCacheAsync()
+        {
             var accounts = await publicClientApplication.GetAccountsAsync();
 
             foreach (var account in accounts)
