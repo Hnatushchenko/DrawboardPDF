@@ -153,8 +153,17 @@ namespace DrawboardPDFApp.ViewModels
 
         private async Task LoginAsync()
         {
-            await loginManager.LoginAsync();
-            IsUserLoggedIn = true;
+            try
+            {
+                await loginManager.LoginAsync();
+                IsUserLoggedIn = true;
+            }
+            catch (ServiceException serviceException)
+                when (serviceException.InnerException is MsalClientException msalClientException &&
+                msalClientException.ErrorCode == MsalError.AuthenticationCanceledError)
+            {
+
+            }
         }
 
         private async Task LogoutAsync()
