@@ -39,17 +39,8 @@ namespace DrawboardPDFApp.Services
 
         public async Task UploadFileAsync(StorageFile file)
         {
-            try
-            {
-                await cloudStorage.AddFileAsync(file);
-                await openedFilesHistoryKeeper.RecordFileOpeningAsync(file, Enums.Location.Cloud);
-            }
-            catch (ServiceException serviceException) 
-                when (serviceException.InnerException is MsalClientException msalClientException && 
-                msalClientException.ErrorCode == MsalError.AuthenticationCanceledError)
-            {
-
-            }
+            await cloudStorage.AddFileAsync(file);
+            await openedFilesHistoryKeeper.AddCloudRecordIfNotExistAsync(file);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace DrawboardPDFApp.ViewModels
             OpenPdfFileIfAlreadySelectedCommand = new AsyncRelayCommand<ItemClickEventArgs>(OpenPdfFileIfAlreadySelectedAsync);
             SwitchToGridViewCommand = new RelayCommand(SwitchToGridView, () => !isGridView);
             SwitchToListViewCommand = new RelayCommand(SwitchToListView, () => !IsListView);
-            UploadDocumentCommand = new AsyncRelayCommand(documentsUploader.UploadNewDocumentAsync);
+            UploadDocumentCommand = new AsyncRelayCommand(UploadNewDocumentAsync);
             OpenPdfFromDeviceCommand = new AsyncRelayCommand(pdfOpener.OpenNewFileAsync);
             this.documentsUploader = documentsUploader;
             this.pdfOpener = pdfOpener;
@@ -115,6 +115,7 @@ namespace DrawboardPDFApp.ViewModels
         public IAsyncRelayCommand OpenPdfFromDeviceCommand { get; }
         public IEnumerable<PdfFileInfoSortingMethod> SortingMethods { get; set; }
         public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> OpenedPdfFilesHistoryTask => openedFilesHistoryKeeper.Records;
+        public ObservableCollection<PdfFileInfo> CloudRecords => openedFilesHistoryKeeper.CloudRecords;
 
         private void SortPdfInfoItems()
         {
@@ -170,6 +171,21 @@ namespace DrawboardPDFApp.ViewModels
         {
             await loginManager.LogoutAsync();
             IsUserLoggedIn = false;
+        }
+
+        private async Task UploadNewDocumentAsync()
+        {
+            try
+            {
+                await documentsUploader.UploadNewDocumentAsync();
+                IsUserLoggedIn = true;
+            }
+            catch (ServiceException serviceException)
+                when (serviceException.InnerException is MsalClientException msalClientException &&
+                msalClientException.ErrorCode == MsalError.AuthenticationCanceledError)
+            {
+
+            }
         }
     }
 }
