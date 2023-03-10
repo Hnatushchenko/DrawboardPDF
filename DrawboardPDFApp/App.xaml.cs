@@ -2,7 +2,9 @@
 using DrawboardPDFApp.Services;
 using DrawboardPDFApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -124,9 +126,25 @@ namespace DrawboardPDFApp
             var services = new ServiceCollection();
 
             services.AddSingleton<IPdfFileOpenPicker, PdfFileOpenPicker>();
+            services.AddSingleton<IPublicClientApplicationProvider, PublicClientApplicationProvider>();
+            services.AddSingleton<IPublicClientApplication>(serviceProvider =>
+            {
+                return serviceProvider.GetRequiredService<IPublicClientApplicationProvider>().PublicClientApplication;
+            });
+            services.AddSingleton<IDriveItemLocalSaver, DriveItemLocalSaver>();
+            services.AddTransient<IAuthenticationResultProvider,  AuthenticationResultProvider>();
+            services.AddSingleton<IGraphServiceClientProvider, GraphServiceClientProvider>();
             services.AddSingleton<IOpenedFilesHistoryKeeper, OpenedFilesHistoryKeeper>();
             services.AddTransient<IPdfCoversService, PdfCoversService>();
+            services.AddTransient<IDocumentsUploader, DocumentsUploader>();
             services.AddTransient<IPdfOpener, PdfOpener>();
+            services.AddSingleton<ILoginManager, LoginManager>();
+            services.AddTransient<ICloudStorage, OneDriveStorage>();
+            services.AddTransient<IConfiguration>(serviceProvider =>
+            {
+                var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", false, true).Build();
+                return configuration;
+            });
             services.AddSingleton<ISortingMethodsProvider, SortingMethodsProvider>();
             services.AddDbContext<IApplicationContext, ApplicationContext>(options =>
             {
