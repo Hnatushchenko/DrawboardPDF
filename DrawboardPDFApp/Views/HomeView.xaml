@@ -111,7 +111,7 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <GridView Grid.Row="3" Grid.Column="1" ItemsSource="{x:Bind ViewModel.OpenedPdfFilesHistoryTask.Result, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay}"
+            <GridView Grid.Row="3" Grid.Column="1" ItemsSource="{x:Bind ViewModel.CloudRecords, Mode=OneWay}" Visibility="{x:Bind ViewModel.IsGridView, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedPdfFile, Mode=TwoWay}" IsItemClickEnabled="True">
                 <interactivity:Interaction.Behaviors>
                     <core:EventTriggerBehavior EventName="ItemClick">
