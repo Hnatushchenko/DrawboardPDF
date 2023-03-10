@@ -14,9 +14,9 @@ namespace DrawboardPDFApp.Services
     {
         private readonly GraphServiceClient graphServiceClient;
 
-        public DriveItemLocalSaver(IGraphServiceClientProvider graphServiceClientProvider)
+        public DriveItemLocalSaver(GraphServiceClient graphServiceClient)
         {
-            graphServiceClient = graphServiceClientProvider.GraphServiceClient;
+            this.graphServiceClient = graphServiceClient;
         }
 
         public async Task<StorageFile> SaveToLocalStorageAsync(DriveItem driveItem)

@@ -125,15 +125,22 @@ namespace DrawboardPDFApp
 
             var services = new ServiceCollection();
 
+            services.AddHttpClient();
             services.AddSingleton<IPdfFileOpenPicker, PdfFileOpenPicker>();
             services.AddSingleton<IPublicClientApplicationProvider, PublicClientApplicationProvider>();
             services.AddSingleton<IPublicClientApplication>(serviceProvider =>
             {
                 return serviceProvider.GetRequiredService<IPublicClientApplicationProvider>().PublicClientApplication;
             });
+            services.AddSingleton<IAuthenticationProvider, CustomAuthenticationProvider>();
             services.AddSingleton<IDriveItemLocalSaver, DriveItemLocalSaver>();
             services.AddTransient<IAuthenticationResultProvider,  AuthenticationResultProvider>();
-            services.AddSingleton<IGraphServiceClientProvider, GraphServiceClientProvider>();
+            services.AddSingleton<GraphServiceClient>(serviceProvider =>
+            {
+                var authenticationProvider = serviceProvider.GetRequiredService<IAuthenticationProvider>();
+                var graphServiceClient = new GraphServiceClient(authenticationProvider);
+                return graphServiceClient;
+            });
             services.AddSingleton<IOpenedFilesHistoryKeeper, OpenedFilesHistoryKeeper>();
             services.AddTransient<IPdfCoversService, PdfCoversService>();
             services.AddTransient<IDocumentsUploader, DocumentsUploader>();

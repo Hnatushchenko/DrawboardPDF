@@ -18,11 +18,11 @@ namespace DrawboardPDFApp.Services
         private readonly string cloudFolderName;
         private readonly IDriveItemLocalSaver driveItemLocalSaver;
 
-        public OneDriveStorage(IGraphServiceClientProvider graphServiceClientProvider,
+        public OneDriveStorage(GraphServiceClient graphServiceClient,
             IConfiguration configuration,
             IDriveItemLocalSaver driveItemLocalSaver)
         {
-            this.graphServiceClient = graphServiceClientProvider.GraphServiceClient;
+            this.graphServiceClient = graphServiceClient;
             cloudFolderName = configuration["CloudFolderName"];
             this.driveItemLocalSaver = driveItemLocalSaver;
         }
