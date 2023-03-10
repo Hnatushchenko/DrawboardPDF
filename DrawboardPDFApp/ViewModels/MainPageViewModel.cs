@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DrawboardPDFApp.Enums;
 using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using DrawboardPDFApp.Services;
@@ -42,7 +43,7 @@ namespace DrawboardPDFApp.ViewModels
                 return;
             }
 
-            await openedFilesHistoryKeeper.RecordFileOpeningAsync(file);
+            await openedFilesHistoryKeeper.RecordFileOpeningAsync(file, Location.Local);
             tabViewService.AddTab(file.DisplayName, typeof(OpenedPdfView), file);
         }
     }
