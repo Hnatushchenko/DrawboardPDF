@@ -31,7 +31,10 @@ namespace DrawboardPDFApp.Services
         public async Task UploadNewDocumentAsync()
         {
             var fileToUpload = await pdfFileOpenPicker.PickSingleFileAsync();
-            await UploadFileAsync(fileToUpload);
+            if (fileToUpload != null)
+            {
+                await UploadFileAsync(fileToUpload); 
+            }
         }
 
         public async Task UploadFileAsync(StorageFile file)
