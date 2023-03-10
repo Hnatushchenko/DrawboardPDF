@@ -120,11 +120,23 @@
   <data name="All Files.Text" xml:space="preserve">
     <value>All Files</value>
   </data>
+  <data name="Created.Text" xml:space="preserve">
+    <value>Created</value>
+  </data>
   <data name="Drawboard Cloud.Text" xml:space="preserve">
     <value>Drawboard Cloud</value>
   </data>
   <data name="Last opened by me" xml:space="preserve">
     <value>Last opened by me</value>
+  </data>
+  <data name="Last Opened.Text" xml:space="preserve">
+    <value>Last Opened</value>
+  </data>
+  <data name="Location.Text" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Login.Text" xml:space="preserve">
+    <value>Login</value>
   </data>
   <data name="Name (A to Z)" xml:space="preserve">
     <value>Name (A to Z)</value>
