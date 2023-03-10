@@ -1,4 +1,5 @@
-﻿using DrawboardPDFApp.Views;
+﻿using DrawboardPDFApp.Enums;
+using DrawboardPDFApp.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,20 +28,20 @@ namespace DrawboardPDFApp.Services
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
             if (file != null)
             {
-                await OpenExistingFileAsync(file);
+                await OpenExistingFileAsync(file, Location.Local);
             }
         }
 
-        public async Task OpenExistingFileAsync(StorageFile file)
+        public async Task OpenExistingFileAsync(StorageFile file, Location location)
         {
-            await openedFilesHistoryKeeper.RecordFileOpeningAsync(file);
-            tabViewService.AddTabOrSelectIfIsOpened(file.DisplayName, typeof(OpenedPdfView), file); 
+            await openedFilesHistoryKeeper.RecordFileOpeningAsync(file, location);
+            tabViewService.AddTabOrSelectIfIsOpened(file.DisplayName, typeof(OpenedPdfView), file);
         }
 
         public async Task OpenExistingFileAsync(string fileToken)
         {
             var file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(fileToken);
-            await OpenExistingFileAsync(file);
+            await OpenExistingFileAsync(file, Location.Local);
         }
     }
 }

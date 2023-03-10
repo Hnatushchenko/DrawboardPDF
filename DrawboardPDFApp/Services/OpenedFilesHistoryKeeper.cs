@@ -1,4 +1,5 @@
-﻿using DrawboardPDFApp.Models;
+﻿using DrawboardPDFApp.Enums;
+using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,17 +25,21 @@ namespace DrawboardPDFApp.Services
     {
         private readonly IApplicationContext applicationContext;
         private readonly IPdfCoversService pdfCoversService;
+        private readonly ICloudStorage cloudStorage;
 
-        public OpenedFilesHistoryKeeper(IApplicationContext applicationContext, IPdfCoversService pdfCoversService)
+        public OpenedFilesHistoryKeeper(IApplicationContext applicationContext,
+            IPdfCoversService pdfCoversService,
+            ICloudStorage cloudStorage)
         {
             this.applicationContext = applicationContext;
             this.pdfCoversService = pdfCoversService;
+            this.cloudStorage = cloudStorage;
             Records = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(GetPdfFilesHistoryAsObservableAsync());
         }
 
         public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; private set; }
 
-        public async Task RecordFileOpeningAsync(StorageFile file)
+        public async Task RecordFileOpeningAsync(StorageFile file, Location location)
         {
             if (RecordExists(file))
             {
@@ -42,7 +47,15 @@ namespace DrawboardPDFApp.Services
             }
             else
             {
-                await AddRecordAsync(file);
+                await AddRecordAsync(file, location);
+            }
+        }
+
+        public async Task AddRecordIfNotExistAsync(StorageFile file, Location location)
+        {
+            if (!RecordExists(file))
+            {
+                await AddRecordAsync(file, location);
             }
         }
 
@@ -60,11 +73,11 @@ namespace DrawboardPDFApp.Services
             return Records.Result.Any(fileInfo => fileInfo.Path == file.Path);
         }
 
-        private async Task AddRecordAsync(StorageFile file)
-        {            
+        private async Task AddRecordAsync(StorageFile file, Location location)
+        {
             string coverPath = await pdfCoversService.CreateCoverAsync(file);
             string fileToken = StorageApplicationPermissions.FutureAccessList.Add(file);
-            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.DateCreated, file.Path, fileToken);
+            var fileInfo = new PdfFileInfo(coverPath, file.Name, DateTimeOffset.Now, file.DateCreated, file.Path, fileToken, location);
             applicationContext.OpenedPdfFilesHistory.Add(fileInfo);
             await applicationContext.SaveChangesAsync();
             Records.Result.Add(fileInfo);
@@ -78,7 +91,7 @@ namespace DrawboardPDFApp.Services
             // TODO: Update on UI as well;
         }
 
-        public async Task<List<PdfFileInfo>> GetAllPdfFilesAsync()
+        private async Task<List<PdfFileInfo>> GetAllPdfFilesAsync()
         {
             return await applicationContext.OpenedPdfFilesHistory.AsNoTracking().ToListAsync();
         }
@@ -88,6 +101,15 @@ namespace DrawboardPDFApp.Services
             var openedPdfFilesHistory = await GetAllPdfFilesAsync();
             var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
             return observableOpenedPdfFilesHistory;
+        }
+
+        public async Task DownloadRecordsFromCloudAsync()
+        {
+            var pdfFiles = await cloudStorage.GetAllPdfFilesAsync();
+            foreach (StorageFile file in pdfFiles)
+            {
+                await AddRecordIfNotExistAsync(file, Location.Cloud);
+            }
         }
     }
 }

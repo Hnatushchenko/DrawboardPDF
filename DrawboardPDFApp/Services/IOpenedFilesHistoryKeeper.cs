@@ -1,4 +1,5 @@
-﻿using DrawboardPDFApp.Models;
+﻿using DrawboardPDFApp.Enums;
+using DrawboardPDFApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,8 @@ namespace DrawboardPDFApp.Services
     {
         NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; }
         Task RemoveAsync(Guid id);
-        Task RecordFileOpeningAsync(StorageFile file);
+        Task RecordFileOpeningAsync(StorageFile file, Location location);
+        Task AddRecordIfNotExistAsync(StorageFile file, Location location);
+        Task DownloadRecordsFromCloudAsync();
     }
 }
