@@ -122,6 +122,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Converters\BooleanToInvertedVisibilityConverter.cs" />
     <Compile Include="Enums\Location.cs" />
     <Compile Include="Extensions\IListExtensions.cs" />
     <Compile Include="MainPage.xaml.cs">
