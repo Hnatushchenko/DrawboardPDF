@@ -39,6 +39,7 @@ namespace DrawboardPDFApp.Services
         public async Task LogoutAsync()
         {
             await ClearTokenCacheAsync();
+            openedFilesHistoryKeeper.ClearCloudRecords();
         }
 
         private async Task ClearTokenCacheAsync()
