@@ -8,6 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:converters="using:DrawboardPDFApp.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     NavigationCacheMode="Enabled">
@@ -25,6 +26,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <converters:BooleanToInvertedVisibilityConverter x:Key="InvertAndVisibilitate"/>
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -200,8 +202,12 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" Padding="20 10"
-                    Command="{x:Bind ViewModel.LoginCommand}">
+                    Command="{x:Bind ViewModel.LoginCommand}" Visibility="{x:Bind ViewModel.IsUserLoggedIn, Mode=OneWay, Converter={StaticResource InvertAndVisibilitate}}">
                 <TextBlock x:Uid="Login" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Button>
+            <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" Padding="20 10"
+                    Command="{x:Bind ViewModel.LogoutCommand}" Visibility="{x:Bind ViewModel.IsUserLoggedIn, Mode=OneWay}">
+                <TextBlock x:Uid="Logout" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Button>
         </Grid>
     </Grid>

@@ -5,6 +5,8 @@ using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using DrawboardPDFApp.Services;
 using DrawboardPDFApp.Views;
+using Microsoft.Graph;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,7 +32,8 @@ namespace DrawboardPDFApp.ViewModels
         public HomeViewModel(IDocumentsUploader documentsUploader, ISortingMethodsProvider sortingMethodsProvider, IPdfOpener pdfOpener, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
             ILoginManager loginManager)
         {
-            LoginCommand = new AsyncRelayCommand(loginManager.LoginAsync);
+            LoginCommand = new AsyncRelayCommand(LoginAsync);
+            LogoutCommand = new AsyncRelayCommand(LogoutAsync);
             OpenPdfFileIfAlreadySelectedCommand = new AsyncRelayCommand<ItemClickEventArgs>(OpenPdfFileIfAlreadySelectedAsync);
             SwitchToGridViewCommand = new RelayCommand(SwitchToGridView, () => !isGridView);
             SwitchToListViewCommand = new RelayCommand(SwitchToListView, () => !IsListView);
@@ -68,6 +71,13 @@ namespace DrawboardPDFApp.ViewModels
             set { SetProperty(ref isListView, value); }
         }
 
+        private bool isUserLoggedIn;
+        public bool IsUserLoggedIn
+        {
+            get { return isUserLoggedIn; }
+            set { SetProperty(ref isUserLoggedIn, value); }
+        }
+
         private bool isGridView;
         public bool IsGridView
         {
@@ -97,6 +107,7 @@ namespace DrawboardPDFApp.ViewModels
         }
 
         public IAsyncRelayCommand LoginCommand { get; }
+        public IAsyncRelayCommand LogoutCommand { get; }
         public IAsyncRelayCommand UploadDocumentCommand { get; }
         public ICommand OpenPdfFileIfAlreadySelectedCommand { get; }
         public IRelayCommand SwitchToListViewCommand { get; }
@@ -138,6 +149,18 @@ namespace DrawboardPDFApp.ViewModels
                 }
                 previouslyClickedPdfFile = pdfFile;
             }
+        }
+
+        private async Task LoginAsync()
+        {
+            await loginManager.LoginAsync();
+            IsUserLoggedIn = true;
+        }
+
+        private async Task LogoutAsync()
+        {
+            await loginManager.LogoutAsync();
+            IsUserLoggedIn = false;
         }
     }
 }
