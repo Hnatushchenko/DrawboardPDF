@@ -22,20 +22,36 @@ namespace DrawboardPDFApp.ViewModels
 {
     public class HomeViewModel : ObservableObject
     {
+        private readonly IDocumentsUploader documentsUploader;
         private readonly IPdfOpener pdfOpener;
         private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
+        private readonly ILoginManager loginManager;
 
-        public HomeViewModel(ISortingMethodsProvider sortingMethodsProvider, IPdfOpener pdfOpener, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper)
+        public HomeViewModel(IDocumentsUploader documentsUploader, ISortingMethodsProvider sortingMethodsProvider, IPdfOpener pdfOpener, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
+            ILoginManager loginManager)
         {
+            LoginCommand = new AsyncRelayCommand(loginManager.LoginAsync);
             OpenPdfFileIfAlreadySelectedCommand = new AsyncRelayCommand<ItemClickEventArgs>(OpenPdfFileIfAlreadySelectedAsync);
             SwitchToGridViewCommand = new RelayCommand(SwitchToGridView, () => !isGridView);
             SwitchToListViewCommand = new RelayCommand(SwitchToListView, () => !IsListView);
+            UploadDocumentCommand = new AsyncRelayCommand(documentsUploader.UploadNewDocumentAsync);
             OpenPdfFromDeviceCommand = new AsyncRelayCommand(pdfOpener.OpenNewFileAsync);
+            this.documentsUploader = documentsUploader;
             this.pdfOpener = pdfOpener;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
+            this.loginManager = loginManager;
             SortingMethods = sortingMethodsProvider.SortingMethods;
             SelectedSortingMethod = SortingMethods.First();
-            IsGridView = true; 
+            IsGridView = true;
+            OpenedPdfFilesHistoryTask.PropertyChanged += OpenedPdfFilesHistoryTask_PropertyChanged;
+        }
+
+        private void OpenedPdfFilesHistoryTask_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(OpenedPdfFilesHistoryTask.Result))
+            {
+                SortPdfInfoItems();
+            }
         }
 
         private int cloudFilesNumber;
@@ -80,6 +96,8 @@ namespace DrawboardPDFApp.ViewModels
             }
         }
 
+        public IAsyncRelayCommand LoginCommand { get; }
+        public IAsyncRelayCommand UploadDocumentCommand { get; }
         public ICommand OpenPdfFileIfAlreadySelectedCommand { get; }
         public IRelayCommand SwitchToListViewCommand { get; }
         public IRelayCommand SwitchToGridViewCommand { get; }
@@ -89,7 +107,7 @@ namespace DrawboardPDFApp.ViewModels
 
         private void SortPdfInfoItems()
         {
-            OpenedPdfFilesHistoryTask.Result.Sort(SelectedSortingMethod.Comparison);
+            OpenedPdfFilesHistoryTask.Result?.Sort(SelectedSortingMethod.Comparison);
         }
 
         private void SwitchToListView()

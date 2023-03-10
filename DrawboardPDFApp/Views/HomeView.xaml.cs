@@ -44,7 +44,9 @@ namespace DrawboardPDFApp.Views
                 var openedFilesHistoryKeeper = App.Current.Services.GetRequiredService<IOpenedFilesHistoryKeeper>();
                 var pdfOpener = new PdfOpener(tabViewService, pdfFileOpenPicker, openedFilesHistoryKeeper);
                 var sortingMethodsProvider = App.Current.Services.GetRequiredService<ISortingMethodsProvider>();
-                ViewModel = new HomeViewModel(sortingMethodsProvider, pdfOpener, openedFilesHistoryKeeper);
+                var documentUploader = App.Current.Services.GetRequiredService<IDocumentsUploader>();
+                var loginManager = App.Current.Services.GetRequiredService<ILoginManager>();
+                ViewModel = new HomeViewModel(documentUploader, sortingMethodsProvider, pdfOpener, openedFilesHistoryKeeper, loginManager);
                 base.OnNavigatedTo(e);
             }
             else
