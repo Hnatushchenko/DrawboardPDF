@@ -10,7 +10,7 @@ namespace DrawboardPDFApp.Services
     public interface IOpenedFilesHistoryKeeper
     {
         ObservableCollection<PdfFileInfo> CloudRecords { get; }
-        NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; }
+        ObservableCollection<PdfFileInfo> AllRecords { get; }
 
         Task AddCloudRecordIfNotExistAsync(StorageFile file);
         Task AddLocalRecordIfNotExistAsync(StorageFile file);

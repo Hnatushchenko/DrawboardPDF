@@ -35,12 +35,53 @@ namespace DrawboardPDFApp.Services
             this.applicationContext = applicationContext;
             this.pdfCoversService = pdfCoversService;
             this.cloudStorage = cloudStorage;
-            Records = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(GetPdfFilesHistoryAsObservableAsync());
+            LocalRecords = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(GetPdfFilesHistoryAsObservableAsync());
+            CloudRecords.CollectionChanged += LocalRecordsChanged;
         }
 
-        public NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> Records { get; private set; }
+
+        private void LocalRecordsChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                    foreach (var item in e.NewItems.Cast<PdfFileInfo>())
+                    {
+                        AllRecords.Add(item);
+                    }
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                    foreach (var item in e.OldItems.Cast<PdfFileInfo>())
+                    {
+                        AllRecords.Remove(item);
+                    }
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                    foreach (var item in e.OldItems.Cast<PdfFileInfo>())
+                    {
+                        AllRecords.Remove(item);
+                    }
+                    foreach (var item in e.NewItems.Cast<PdfFileInfo>())
+                    {
+                        AllRecords.Add(item);
+                    }
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    foreach (var item in e.OldItems.Cast<PdfFileInfo>())
+                    {
+                        AllRecords.Remove(item);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private NotifyTaskCompletion<ObservableCollection<PdfFileInfo>> LocalRecords { get; set; }
         public ObservableCollection<PdfFileInfo> CloudRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
-        //public ObservableCollection<PdfFileInfo> AllRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
+        public ObservableCollection<PdfFileInfo> AllRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
 
         public async Task RecordFileOpeningAsync(StorageFile file, Location location)
         {
@@ -67,13 +108,14 @@ namespace DrawboardPDFApp.Services
             var fileToRemove = await applicationContext.OpenedPdfFilesHistory.FirstOrDefaultAsync(x => x.Id == id);
             applicationContext.OpenedPdfFilesHistory.Remove(fileToRemove);
             await applicationContext.SaveChangesAsync();
-            var fileInfo = Records.Result.FirstOrDefault(x => x.Id == id);
-            Records.Result.Remove(fileInfo);
+            var fileInfo = LocalRecords.Result.FirstOrDefault(x => x.Id == id);
+            LocalRecords.Result.Remove(fileInfo);
         }
 
         private bool RecordExistsLocally(StorageFile file)
         {
-            return Records.Result.Any(fileInfo => fileInfo.Path == file.Path);
+            var exists = LocalRecords.Result.Any(fileInfo => fileInfo.Path == file.Path);
+            return exists;
         }
 
         private async Task AddLocalRecordAsync(StorageFile file)
@@ -81,7 +123,7 @@ namespace DrawboardPDFApp.Services
             var fileInfo = await CreateRecordAsync(file, Location.Local);
             applicationContext.OpenedPdfFilesHistory.Add(fileInfo);
             await applicationContext.SaveChangesAsync();
-            Records.Result.Add(fileInfo);
+            LocalRecords.Result.Add(fileInfo);
         }
 
         private async Task UpdateAsync(StorageFile file, Location location)
@@ -115,8 +157,13 @@ namespace DrawboardPDFApp.Services
 
         private async Task<ObservableCollection<PdfFileInfo>> GetPdfFilesHistoryAsObservableAsync()
         {
-            var openedPdfFilesHistory = await GetAllPdfFilesAsync();
-            var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>(openedPdfFilesHistory);
+            var localPdfFiles = await GetAllPdfFilesAsync();
+            var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>();
+            observableOpenedPdfFilesHistory.CollectionChanged += LocalRecordsChanged;
+            foreach (var pdfFileInfo in localPdfFiles)
+            {
+                observableOpenedPdfFilesHistory.Add(pdfFileInfo);
+            }
             return observableOpenedPdfFilesHistory;
         }
 
