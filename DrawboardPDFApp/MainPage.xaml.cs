@@ -42,7 +42,8 @@ namespace DrawboardPDFApp
             var tabViewService = new TabViewService(TabView);
             var pdfFileOpenService = App.Current.Services.GetRequiredService<IPdfFileOpenPicker>();
             var openedFilesHistoryKeeper = App.Current.Services.GetRequiredService<IOpenedFilesHistoryKeeper>();
-            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, openedFilesHistoryKeeper);
+            var loginManager = App.Current.Services.GetRequiredService<ILoginManager>();
+            ViewModel = new MainPageViewModel(tabViewService, pdfFileOpenService, openedFilesHistoryKeeper, loginManager);
             base.OnNavigatedTo(e);
         }
 

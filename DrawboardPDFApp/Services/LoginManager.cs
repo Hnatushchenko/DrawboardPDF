@@ -1,8 +1,10 @@
-﻿using DrawboardPDFApp.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DrawboardPDFApp.Models;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,33 +15,53 @@ using Windows.Storage;
 
 namespace DrawboardPDFApp.Services
 {
-    public class LoginManager : ILoginManager
+    public class LoginManager : ObservableObject, ILoginManager
     {
         private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
-        private readonly IHttpClientFactory httpClientFactory;
         private readonly IAuthenticationResultProvider authenticationResultProvider;
         private readonly IPublicClientApplication publicClientApplication;
 
         public LoginManager(IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
-            IHttpClientFactory httpClientFactory,
             IAuthenticationResultProvider authenticationResultProvider,
             IPublicClientApplication publicClientApplication)
         {
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
-            this.httpClientFactory = httpClientFactory;
             this.authenticationResultProvider = authenticationResultProvider;
             this.publicClientApplication = publicClientApplication;
         }
 
+        private bool isUserLoggedIn;
+        public bool IsUserLoggedIn
+        {
+            get => isUserLoggedIn;
+            set => SetProperty(ref isUserLoggedIn, value);
+        }
+
+        public async Task LoginSilentlyIfPossibleAsync()
+        {
+            if (await authenticationResultProvider.CanAuthenticateSilentlyAsync())
+            {
+                await LoginAsync();
+            }
+        }
+
         public async Task LoginAsync()
         {
-            await openedFilesHistoryKeeper.DownloadRecordsFromCloudAsync();
+            if (!IsUserLoggedIn)
+            {
+                await openedFilesHistoryKeeper.DownloadRecordsFromCloudAsync();
+                IsUserLoggedIn = true;
+            }
         }
 
         public async Task LogoutAsync()
         {
-            await ClearTokenCacheAsync();
-            openedFilesHistoryKeeper.ClearCloudRecords();
+            if (IsUserLoggedIn)
+            {
+                await ClearTokenCacheAsync();
+                openedFilesHistoryKeeper.ClearCloudRecords();
+                IsUserLoggedIn = false; 
+            }
         }
 
         private async Task ClearTokenCacheAsync()
@@ -51,5 +73,5 @@ namespace DrawboardPDFApp.Services
                 await publicClientApplication.RemoveAsync(account);
             }
         }
-    }
+    } 
 }

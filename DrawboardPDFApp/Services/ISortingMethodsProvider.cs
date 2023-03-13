@@ -6,5 +6,6 @@ namespace DrawboardPDFApp.Services
     public interface ISortingMethodsProvider
     {
         IReadOnlyCollection<PdfFileInfoSortingMethod> SortingMethods { get; }
+        PdfFileInfoSortingMethod SelectedMethod { get; set; }
     }
 }

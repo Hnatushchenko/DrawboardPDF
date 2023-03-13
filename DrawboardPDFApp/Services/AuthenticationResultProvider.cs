@@ -11,15 +11,33 @@ namespace DrawboardPDFApp.Services
     public class AuthenticationResultProvider : IAuthenticationResultProvider
     {
         private readonly IPublicClientApplication publicClientApplication;
+        private readonly IReadOnlyCollection<string> scopes;
 
         public AuthenticationResultProvider(IPublicClientApplication publicClientApplication)
         {
             this.publicClientApplication = publicClientApplication;
+            scopes = new List<string>
+            {
+                "Files.ReadWrite",
+            }.AsReadOnly();
+        }
+
+        public async Task<bool> CanAuthenticateSilentlyAsync()
+        {
+            var accounts = await publicClientApplication.GetAccountsAsync();
+            try
+            {
+                await publicClientApplication.AcquireTokenSilent(scopes, accounts.FirstOrDefault()).ExecuteAsync();
+                return true;
+            }
+            catch (MsalUiRequiredException)
+            {
+                return false;
+            }
         }
 
         public async Task<AuthenticationResult> GetAuthenticationResultAsync()
         {
-            var scopes = new[] { "Files.ReadWrite" };
             var accounts = await publicClientApplication.GetAccountsAsync();
             AuthenticationResult authenticationResult;
             try

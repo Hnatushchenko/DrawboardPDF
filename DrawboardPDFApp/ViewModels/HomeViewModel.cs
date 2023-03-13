@@ -10,6 +10,7 @@ using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,11 +49,23 @@ namespace DrawboardPDFApp.ViewModels
             this.pdfOpener = pdfOpener;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
             this.loginManager = loginManager;
+
+            loginManager.PropertyChanged += LoginManager_PropertyChanged;
+
             SortingMethods = sortingMethodsProvider.SortingMethods;
             SelectedSortingMethod = sortingMethodsProvider.SelectedMethod;
             IsGridView = true;
             SwitchToAllFiles();
         }
+
+        private void LoginManager_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsUserLoggedIn))
+            {
+                OnPropertyChanged(nameof(IsUserLoggedIn));
+            }
+        }
+
 
         private bool isListView;
         public bool IsListView
@@ -61,12 +74,7 @@ namespace DrawboardPDFApp.ViewModels
             set { SetProperty(ref isListView, value); }
         }
 
-        private bool isUserLoggedIn;
-        public bool IsUserLoggedIn
-        {
-            get { return isUserLoggedIn; }
-            set { SetProperty(ref isUserLoggedIn, value); }
-        }
+        public bool IsUserLoggedIn => loginManager.IsUserLoggedIn;
 
         private bool isGridView;
         public bool IsGridView
@@ -171,7 +179,6 @@ namespace DrawboardPDFApp.ViewModels
             try
             {
                 await loginManager.LoginAsync();
-                IsUserLoggedIn = true;
             }
             catch (ServiceException serviceException)
                 when (serviceException.InnerException is MsalClientException msalClientException &&
@@ -184,7 +191,6 @@ namespace DrawboardPDFApp.ViewModels
         private async Task LogoutAsync()
         {
             await loginManager.LogoutAsync();
-            IsUserLoggedIn = false;
         }
 
         private async Task UploadNewDocumentAsync()
@@ -192,7 +198,6 @@ namespace DrawboardPDFApp.ViewModels
             try
             {
                 await documentsUploader.UploadNewDocumentAsync();
-                IsUserLoggedIn = true;
             }
             catch (ServiceException serviceException)
                 when (serviceException.InnerException is MsalClientException msalClientException &&

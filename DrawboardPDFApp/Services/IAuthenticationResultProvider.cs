@@ -6,5 +6,6 @@ namespace DrawboardPDFApp.Services
     public interface IAuthenticationResultProvider
     {
         Task<AuthenticationResult> GetAuthenticationResultAsync();
+        Task<bool> CanAuthenticateSilentlyAsync();
     }
 }

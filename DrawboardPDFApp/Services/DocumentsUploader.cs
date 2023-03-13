@@ -18,14 +18,17 @@ namespace DrawboardPDFApp.Services
         private readonly IPdfFileOpenPicker pdfFileOpenPicker;
         private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
         private readonly ICloudStorage cloudStorage;
+        private readonly ILoginManager loginManager;
 
         public DocumentsUploader(IPdfFileOpenPicker pdfFileOpenPicker,
             IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
-            ICloudStorage cloudStorage)
+            ICloudStorage cloudStorage,
+            ILoginManager loginManager)
         {
             this.pdfFileOpenPicker = pdfFileOpenPicker;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
             this.cloudStorage = cloudStorage;
+            this.loginManager = loginManager;
         }
 
         public async Task UploadNewDocumentAsync()
@@ -39,6 +42,7 @@ namespace DrawboardPDFApp.Services
 
         public async Task UploadFileAsync(StorageFile file)
         {
+            await loginManager.LoginAsync();
             await cloudStorage.AddFileAsync(file);
             await openedFilesHistoryKeeper.AddCloudRecordIfNotExistAsync(file);
         }

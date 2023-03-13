@@ -23,19 +23,31 @@ namespace DrawboardPDFApp.ViewModels
         private readonly ITabViewService tabViewService;
         private readonly IPdfFileOpenPicker pdfFileOpenPicker;
         private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
+        private readonly ILoginManager loginManager;
 
-        public MainPageViewModel(ITabViewService tabViewService, IPdfFileOpenPicker pdfFileOpenPicker, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper)
+        public MainPageViewModel(ITabViewService tabViewService,
+            IPdfFileOpenPicker pdfFileOpenPicker,
+            IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
+            ILoginManager loginManager)
         {
-            AddTabCommand = new AsyncRelayCommand(AddTab);
+            AddTabCommand = new AsyncRelayCommand(AddTabAsync);
+            ExecuteStartupCommand = new AsyncRelayCommand(ExecuteStartupAsync);
 
             this.tabViewService = tabViewService;
             this.pdfFileOpenPicker = pdfFileOpenPicker;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
+            this.loginManager = loginManager;
         }
 
+        public IAsyncRelayCommand ExecuteStartupCommand { get; }
         public ICommand AddTabCommand { get; }
 
-        private async Task AddTab()
+        private async Task ExecuteStartupAsync()
+        {
+            await loginManager.LoginSilentlyIfPossibleAsync();
+        }
+
+        private async Task AddTabAsync()
         {
             var file = await pdfFileOpenPicker.PickSingleFileAsync();
             if (file is null)
