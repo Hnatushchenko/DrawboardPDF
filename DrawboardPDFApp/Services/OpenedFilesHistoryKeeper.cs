@@ -1,4 +1,5 @@
 ﻿using DrawboardPDFApp.Enums;
+using DrawboardPDFApp.Extensions;
 using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,38 +29,40 @@ namespace DrawboardPDFApp.Services
         private readonly IApplicationContext applicationContext;
         private readonly IPdfCoversService pdfCoversService;
         private readonly ICloudStorage cloudStorage;
+        private readonly ISortingMethodsProvider sortingMethodsProvider;
 
         public OpenedFilesHistoryKeeper(IApplicationContext applicationContext,
             IPdfCoversService pdfCoversService,
-            ICloudStorage cloudStorage)
+            ICloudStorage cloudStorage,
+            ISortingMethodsProvider sortingMethodsProvider)
         {
             this.applicationContext = applicationContext;
             this.pdfCoversService = pdfCoversService;
             this.cloudStorage = cloudStorage;
+            this.sortingMethodsProvider = sortingMethodsProvider;
             LocalRecords = new NotifyTaskCompletion<ObservableCollection<PdfFileInfo>>(GetPdfFilesHistoryAsObservableAsync());
-            CloudRecords.CollectionChanged += LocalRecordsChanged;
+            CloudRecords.CollectionChanged += RecordsChanged;
         }
 
-
-        private void LocalRecordsChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void RecordsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                case NotifyCollectionChangedAction.Add:
                     foreach (var item in e.NewItems.Cast<PdfFileInfo>())
                     {
                         AllRecords.Add(item);
                     }
                     break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                case NotifyCollectionChangedAction.Move:
                     break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                case NotifyCollectionChangedAction.Remove:
                     foreach (var item in e.OldItems.Cast<PdfFileInfo>())
                     {
                         AllRecords.Remove(item);
                     }
                     break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                case NotifyCollectionChangedAction.Replace:
                     foreach (var item in e.OldItems.Cast<PdfFileInfo>())
                     {
                         AllRecords.Remove(item);
@@ -66,16 +70,14 @@ namespace DrawboardPDFApp.Services
                     foreach (var item in e.NewItems.Cast<PdfFileInfo>())
                     {
                         AllRecords.Add(item);
-                    }
-                    break;
-                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-                    foreach (var item in e.OldItems.Cast<PdfFileInfo>())
-                    {
-                        AllRecords.Remove(item);
                     }
                     break;
                 default:
                     break;
+            }
+            if (e.Action != NotifyCollectionChangedAction.Remove)
+            {
+                AllRecords.Sort(sortingMethodsProvider.SelectedMethod.Comparison);
             }
         }
 
@@ -159,7 +161,7 @@ namespace DrawboardPDFApp.Services
         {
             var localPdfFiles = await GetAllPdfFilesAsync();
             var observableOpenedPdfFilesHistory = new ObservableCollection<PdfFileInfo>();
-            observableOpenedPdfFilesHistory.CollectionChanged += LocalRecordsChanged;
+            observableOpenedPdfFilesHistory.CollectionChanged += RecordsChanged;
             foreach (var pdfFileInfo in localPdfFiles)
             {
                 observableOpenedPdfFilesHistory.Add(pdfFileInfo);
@@ -178,6 +180,10 @@ namespace DrawboardPDFApp.Services
 
         public void ClearCloudRecords()
         {
+            foreach (var cloudRecord in CloudRecords)
+            {
+                AllRecords.Remove(cloudRecord);
+            }
             CloudRecords.Clear();
         }
 
@@ -196,6 +202,7 @@ namespace DrawboardPDFApp.Services
 
             var fileInfo = await CreateRecordAsync(file, Location.Cloud);
             CloudRecords.Add(fileInfo);
+            CloudRecords.Sort(sortingMethodsProvider.SelectedMethod.Comparison);
         }
     }
 }

@@ -25,6 +25,7 @@ namespace DrawboardPDFApp.ViewModels
     public class HomeViewModel : ObservableObject
     {
         private readonly IDocumentsUploader documentsUploader;
+        private readonly ISortingMethodsProvider sortingMethodsProvider;
         private readonly IPdfOpener pdfOpener;
         private readonly IOpenedFilesHistoryKeeper openedFilesHistoryKeeper;
         private readonly ILoginManager loginManager;
@@ -41,12 +42,14 @@ namespace DrawboardPDFApp.ViewModels
             SwitchToListViewCommand = new RelayCommand(SwitchToListView, () => !IsListView);
             UploadDocumentCommand = new AsyncRelayCommand(UploadNewDocumentAsync);
             OpenPdfFromDeviceCommand = new AsyncRelayCommand(pdfOpener.OpenNewFileAsync);
+
             this.documentsUploader = documentsUploader;
+            this.sortingMethodsProvider = sortingMethodsProvider;
             this.pdfOpener = pdfOpener;
             this.openedFilesHistoryKeeper = openedFilesHistoryKeeper;
             this.loginManager = loginManager;
             SortingMethods = sortingMethodsProvider.SortingMethods;
-            SelectedSortingMethod = SortingMethods.First();
+            SelectedSortingMethod = sortingMethodsProvider.SelectedMethod;
             IsGridView = true;
             SwitchToAllFiles();
         }
@@ -78,8 +81,11 @@ namespace DrawboardPDFApp.ViewModels
             get => selectedSortingMethod;
             set
             {
-                SetProperty(ref selectedSortingMethod, value);
-                SortPdfInfoItems();
+                if (SetProperty(ref selectedSortingMethod, value))
+                {
+                    sortingMethodsProvider.SelectedMethod = value;
+                    SortPdfInfoItems();
+                }
             }
         }
 
@@ -126,6 +132,7 @@ namespace DrawboardPDFApp.ViewModels
 
         private void SortPdfInfoItems()
         {
+            CloudRecords.Sort(SelectedSortingMethod.Comparison);
             AllRecords.Sort(SelectedSortingMethod.Comparison);
         }
 

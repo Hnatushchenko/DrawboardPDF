@@ -17,9 +17,11 @@ namespace DrawboardPDFApp.Services
         {
             resourceLoader = ResourceLoader.GetForCurrentView();
             CreateSortingMethods();
+            SelectedMethod = SortingMethods.First();
         }
 
         public IReadOnlyCollection<PdfFileInfoSortingMethod> SortingMethods { get; private set; }
+        public PdfFileInfoSortingMethod SelectedMethod { get; set; }
 
         private void CreateSortingMethods()
         {
