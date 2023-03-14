@@ -3,7 +3,6 @@ using DrawboardPDFApp.Extensions;
 using DrawboardPDFApp.Models;
 using DrawboardPDFApp.Repository;
 using Microsoft.EntityFrameworkCore;
-//using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -85,15 +84,33 @@ namespace DrawboardPDFApp.Services
         public ObservableCollection<PdfFileInfo> CloudRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
         public ObservableCollection<PdfFileInfo> AllRecords { get; private set; } = new ObservableCollection<PdfFileInfo>();
 
-        public async Task RecordFileOpeningAsync(StorageFile file, Location location)
+        private async Task RecordLocalFileOpeningAsync(StorageFile file)
         {
             if (RecordExistsLocally(file))
             {
-                await UpdateAsync(file, location);
+                await UpdateAsync(file, Location.Local);
             }
             else
             {
                 await AddLocalRecordAsync(file);
+            }
+        }
+
+        private async Task RecordCloudFileOpeningAsync(StorageFile file)
+        {
+            await UpdateAsync(file, Location.Cloud);
+        }
+
+        public async Task RecordFileOpeningAsync(StorageFile file, Location location)
+        {
+            switch (location)
+            {
+                case Location.Local:
+                    await RecordLocalFileOpeningAsync(file);
+                    break;
+                case Location.Cloud:
+                    await RecordCloudFileOpeningAsync(file);
+                    break;
             }
         }
 

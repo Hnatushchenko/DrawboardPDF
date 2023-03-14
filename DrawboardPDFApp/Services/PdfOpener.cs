@@ -38,10 +38,10 @@ namespace DrawboardPDFApp.Services
             tabViewService.AddTabOrSelectIfIsOpened(file.DisplayName, typeof(OpenedPdfView), file);
         }
 
-        public async Task OpenExistingFileAsync(string fileToken)
+        public async Task OpenExistingFileAsync(string fileToken, Location location)
         {
             var file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(fileToken);
-            await OpenExistingFileAsync(file, Location.Local);
+            await OpenExistingFileAsync(file, location);
         }
     }
 }

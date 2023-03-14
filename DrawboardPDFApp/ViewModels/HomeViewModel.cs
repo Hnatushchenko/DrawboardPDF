@@ -179,7 +179,7 @@ namespace DrawboardPDFApp.ViewModels
             {
                 if (previouslyClickedPdfFile == pdfFile)
                 {
-                    await pdfOpener.OpenExistingFileAsync(pdfFile.FileToken);
+                    await pdfOpener.OpenExistingFileAsync(pdfFile.FileToken, pdfFile.Location);
                 }
                 previouslyClickedPdfFile = pdfFile;
             }
