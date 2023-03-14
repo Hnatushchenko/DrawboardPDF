@@ -88,10 +88,12 @@ namespace DrawboardPDFApp.Services
 
         public async Task AddFileAsync(StorageFile file)
         {
-            var cloudFolderId = await GetCloudFolderIdAsync();
             using (var stream = await file.OpenStreamForReadAsync())
             {
-                var uploadResult = await graphServiceClient.Me.Drive.Items[cloudFolderId].ItemWithPath(file.Name).Content.Request().PutAsync<DriveItem>(stream);
+                var uploadResult = await graphServiceClient.Me.Drive.Root
+                    .ItemWithPath($"/{cloudFolderName}/{file.Name}").Content
+                    .Request()
+                    .PutAsync<DriveItem>(stream);
             }
         }
 
