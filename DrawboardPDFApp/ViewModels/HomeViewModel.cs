@@ -34,6 +34,7 @@ namespace DrawboardPDFApp.ViewModels
         public HomeViewModel(IDocumentsUploader documentsUploader, ISortingMethodsProvider sortingMethodsProvider, IPdfOpener pdfOpener, IOpenedFilesHistoryKeeper openedFilesHistoryKeeper,
             ILoginManager loginManager)
         {
+            RemovePdfFileFromAppCommand = new AsyncRelayCommand(RemovePdfFileFromAppAsync);
             SwitchToAllFilesCommand = new RelayCommand(SwitchToAllFiles);
             SwitchToCloudFilesCommand = new RelayCommand(SwitchToCloudFiles);
             LoginCommand = new AsyncRelayCommand(LoginAsync);
@@ -65,7 +66,6 @@ namespace DrawboardPDFApp.ViewModels
                 OnPropertyChanged(nameof(IsUserLoggedIn));
             }
         }
-
 
         private bool isListView;
         public bool IsListView
@@ -101,10 +101,7 @@ namespace DrawboardPDFApp.ViewModels
         public PdfFileInfo SelectedPdfFile
         {
             get => selectedPdfFile;
-            set
-            {
-                SetProperty(ref selectedPdfFile, value);
-            }
+            set => SetProperty(ref selectedPdfFile, value);
         }
 
         private ObservableCollection<PdfFileInfo> pdfFiles;
@@ -115,6 +112,7 @@ namespace DrawboardPDFApp.ViewModels
         }
 
         public ICommand SwitchToCloudFilesCommand { get; }
+        public IAsyncRelayCommand RemovePdfFileFromAppCommand { get; }
         public ICommand SwitchToAllFilesCommand { get; }
         public IAsyncRelayCommand LoginCommand { get; }
         public IAsyncRelayCommand LogoutCommand { get; }
@@ -126,7 +124,6 @@ namespace DrawboardPDFApp.ViewModels
         public IEnumerable<PdfFileInfoSortingMethod> SortingMethods { get; set; }
         public ObservableCollection<PdfFileInfo> AllRecords => openedFilesHistoryKeeper.AllRecords;
         public ObservableCollection<PdfFileInfo> CloudRecords => openedFilesHistoryKeeper.CloudRecords;
-        
 
         private void SwitchToCloudFiles()
         {
@@ -204,6 +201,14 @@ namespace DrawboardPDFApp.ViewModels
                 msalClientException.ErrorCode == MsalError.AuthenticationCanceledError)
             {
 
+            }
+        } 
+
+        private async Task RemovePdfFileFromAppAsync()
+        {
+            if (SelectedPdfFile != null)    
+            {
+                await openedFilesHistoryKeeper.RemoveLocalFileAsync(SelectedPdfFile.Id); 
             }
         }
     }

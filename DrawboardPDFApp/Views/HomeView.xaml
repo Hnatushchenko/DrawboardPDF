@@ -8,10 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:toolkitConverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:converters="using:DrawboardPDFApp.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    NavigationCacheMode="Enabled">
+    >
 
     <Page.Resources>
         <Style x:Key="TransparentBackgroundButtonStyle" TargetType="Button">
@@ -27,6 +28,8 @@
             </Setter>
         </Style>
         <converters:BooleanToInvertedVisibilityConverter x:Key="InvertAndVisibilitate"/>
+        <converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
+        <toolkitConverters:StringFormatConverter x:Key="StringFormatConverter"/>
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -196,16 +199,40 @@
                 </ListView.ItemTemplate>
             </ListView>
         </Grid>
-        <Grid Grid.Column="1" Background="#F9F9F9" Padding="60 0 60 30" >
+        <Grid Grid.Column="1" Background="#F9F9F9" Padding="35 0 35 30" Width="275" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" Padding="20 10"
+            <StackPanel Grid.Row="0"
+                        VerticalAlignment="Center"
+                        Visibility="{x:Bind ViewModel.SelectedPdfFile, Converter={StaticResource ObjectToVisibilityConverter}, Mode=OneWay}">
+                <TextBlock TextWrapping="Wrap">
+                    <TextBlock.Inlines>
+                        <Run Text="{x:Bind ViewModel.SelectedPdfFile.DisplayName, Mode=OneWay}" FontWeight="Bold" FontFamily="Arial" FontSize="19" />
+                    </TextBlock.Inlines>
+                </TextBlock>
+                <TextBlock Margin="0 0 0 30" TextWrapping="Wrap">
+                    <TextBlock.Inlines>
+                        <Run Text="{x:Bind ViewModel.SelectedPdfFile.DateCreated, Converter={StaticResource StringFormatConverter}, ConverterParameter='(Created {0:d/M/yyyy})', Mode=OneWay}" Foreground="#9EA2AA" FontFamily="Arial" FontSize="14" /> 
+                    </TextBlock.Inlines>
+                </TextBlock>
+                <Button Style="{StaticResource TransparentBackgroundButtonStyle}" Command="{x:Bind ViewModel.RemovePdfFileFromAppCommand}" CommandParameter="{x:Bind ViewModel.SelectedPdfFile}">
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE711;" Margin="0 0 10 0" />
+                        <TextBlock>
+                            <TextBlock.Inlines>
+                                <Run x:Uid="Remove from app" FontWeight="Bold" FontSize="14"/>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="20 10"
                     Command="{x:Bind ViewModel.LoginCommand}" Visibility="{x:Bind ViewModel.IsUserLoggedIn, Mode=OneWay, Converter={StaticResource InvertAndVisibilitate}}">
                 <TextBlock x:Uid="Login" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Button>
-            <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" Padding="20 10"
+            <Button Grid.Row="1" CornerRadius="20" Background="#219DE3" VerticalAlignment="Bottom" HorizontalAlignment="Center" Padding="20 10"
                     Command="{x:Bind ViewModel.LogoutCommand}" Visibility="{x:Bind ViewModel.IsUserLoggedIn, Mode=OneWay}">
                 <TextBlock x:Uid="Logout" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </Button>

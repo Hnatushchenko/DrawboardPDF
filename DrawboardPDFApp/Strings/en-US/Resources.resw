@@ -150,6 +150,9 @@
   <data name="Open from device.Text" xml:space="preserve">
     <value>Open from device</value>
   </data>
+  <data name="Remove from app.Text" xml:space="preserve">
+    <value>Remove from app</value>
+  </data>
   <data name="Subtitle.Text" xml:space="preserve">
     <value>Choose how you want to work with Drawboard PDF</value>
   </data>

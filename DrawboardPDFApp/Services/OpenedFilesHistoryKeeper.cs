@@ -105,7 +105,7 @@ namespace DrawboardPDFApp.Services
             }
         }
 
-        public async Task RemoveAsync(Guid id)
+        public async Task RemoveLocalFileAsync(Guid id)
         {
             var fileToRemove = await applicationContext.OpenedPdfFilesHistory.FirstOrDefaultAsync(x => x.Id == id);
             applicationContext.OpenedPdfFilesHistory.Remove(fileToRemove);
