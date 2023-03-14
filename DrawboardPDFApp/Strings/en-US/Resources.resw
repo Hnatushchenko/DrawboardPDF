@@ -153,6 +153,9 @@
   <data name="Remove from app.Text" xml:space="preserve">
     <value>Remove from app</value>
   </data>
+  <data name="Remove from cloud.Text" xml:space="preserve">
+    <value>Remove from cloud</value>
+  </data>
   <data name="Subtitle.Text" xml:space="preserve">
     <value>Choose how you want to work with Drawboard PDF</value>
   </data>

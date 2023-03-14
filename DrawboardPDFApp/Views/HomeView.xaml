@@ -217,12 +217,24 @@
                         <Run Text="{x:Bind ViewModel.SelectedPdfFile.DateCreated, Converter={StaticResource StringFormatConverter}, ConverterParameter='(Created {0:d/M/yyyy})', Mode=OneWay}" Foreground="#9EA2AA" FontFamily="Arial" FontSize="14" /> 
                     </TextBlock.Inlines>
                 </TextBlock>
-                <Button Style="{StaticResource TransparentBackgroundButtonStyle}" Command="{x:Bind ViewModel.RemovePdfFileFromAppCommand}" CommandParameter="{x:Bind ViewModel.SelectedPdfFile}">
+                <Button Style="{StaticResource TransparentBackgroundButtonStyle}" Command="{x:Bind ViewModel.RemovePdfFileFromAppCommand}" CommandParameter="{x:Bind ViewModel.SelectedPdfFile}"
+                        Visibility="{x:Bind ViewModel.IsLocalFileSelected, Mode=OneWay}">
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xE711;" Margin="0 0 10 0" />
                         <TextBlock>
                             <TextBlock.Inlines>
                                 <Run x:Uid="Remove from app" FontWeight="Bold" FontSize="14"/>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource TransparentBackgroundButtonStyle}" Command="{x:Bind ViewModel.RemovePdfFileFromCloudCommand}" CommandParameter="{x:Bind ViewModel.SelectedPdfFile}"
+                        Visibility="{x:Bind ViewModel.IsLocalFileSelected, Mode=OneWay, Converter={StaticResource InvertAndVisibilitate}}">
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE711;" Margin="0 0 10 0" />
+                        <TextBlock>
+                            <TextBlock.Inlines>
+                                <Run x:Uid="Remove from cloud" FontWeight="Bold" FontSize="14"/>
                             </TextBlock.Inlines>
                         </TextBlock>
                     </StackPanel>

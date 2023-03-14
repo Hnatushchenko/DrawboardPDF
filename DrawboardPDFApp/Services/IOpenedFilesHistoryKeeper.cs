@@ -17,6 +17,7 @@ namespace DrawboardPDFApp.Services
         Task DownloadRecordsFromCloudAsync();
         Task RecordFileOpeningAsync(StorageFile file, Location location);
         Task RemoveLocalFileAsync(Guid id);
+        Task RemoveCloudFileAsync(string name);
         void ClearCloudRecords();
     }
 }

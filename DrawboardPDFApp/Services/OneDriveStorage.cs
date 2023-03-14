@@ -94,5 +94,12 @@ namespace DrawboardPDFApp.Services
                 var uploadResult = await graphServiceClient.Me.Drive.Items[cloudFolderId].ItemWithPath(file.Name).Content.Request().PutAsync<DriveItem>(stream);
             }
         }
+
+        public async Task RemoveFileAsync(string fileName)
+        {
+            await graphServiceClient.Me.Drive.Root.ItemWithPath($"/{cloudFolderName}/{fileName}")
+                .Request()
+                .DeleteAsync();
+        }
     }
 }

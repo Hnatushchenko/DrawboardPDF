@@ -35,6 +35,7 @@ namespace DrawboardPDFApp.ViewModels
             ILoginManager loginManager)
         {
             RemovePdfFileFromAppCommand = new AsyncRelayCommand(RemovePdfFileFromAppAsync);
+            RemovePdfFileFromCloudCommand = new AsyncRelayCommand(RemovePdfFileFromCloudAsync);
             SwitchToAllFilesCommand = new RelayCommand(SwitchToAllFiles);
             SwitchToCloudFilesCommand = new RelayCommand(SwitchToCloudFiles);
             LoginCommand = new AsyncRelayCommand(LoginAsync);
@@ -83,6 +84,14 @@ namespace DrawboardPDFApp.ViewModels
             set { SetProperty(ref isGridView, value); }
         }
 
+        public bool IsLocalFileSelected
+        {
+            get
+            {
+                return SelectedPdfFile != null && SelectedPdfFile.Location == Enums.Location.Local;
+            }
+        }
+
         private PdfFileInfoSortingMethod selectedSortingMethod;
         public PdfFileInfoSortingMethod SelectedSortingMethod
         {
@@ -101,7 +110,11 @@ namespace DrawboardPDFApp.ViewModels
         public PdfFileInfo SelectedPdfFile
         {
             get => selectedPdfFile;
-            set => SetProperty(ref selectedPdfFile, value);
+            set
+            {
+                SetProperty(ref selectedPdfFile, value);
+                OnPropertyChanged(nameof(IsLocalFileSelected));
+            }
         }
 
         private ObservableCollection<PdfFileInfo> pdfFiles;
@@ -113,6 +126,7 @@ namespace DrawboardPDFApp.ViewModels
 
         public ICommand SwitchToCloudFilesCommand { get; }
         public IAsyncRelayCommand RemovePdfFileFromAppCommand { get; }
+        public IAsyncRelayCommand RemovePdfFileFromCloudCommand { get; }
         public ICommand SwitchToAllFilesCommand { get; }
         public IAsyncRelayCommand LoginCommand { get; }
         public IAsyncRelayCommand LogoutCommand { get; }
@@ -206,9 +220,17 @@ namespace DrawboardPDFApp.ViewModels
 
         private async Task RemovePdfFileFromAppAsync()
         {
-            if (SelectedPdfFile != null)    
+            if (SelectedPdfFile != null && SelectedPdfFile.Location == Enums.Location.Local)    
             {
                 await openedFilesHistoryKeeper.RemoveLocalFileAsync(SelectedPdfFile.Id); 
+            }
+        }
+
+        private async Task RemovePdfFileFromCloudAsync()
+        {
+            if (SelectedPdfFile != null && SelectedPdfFile.Location == Enums.Location.Cloud)
+            {
+                await openedFilesHistoryKeeper.RemoveCloudFileAsync(SelectedPdfFile.DisplayName);
             }
         }
     }

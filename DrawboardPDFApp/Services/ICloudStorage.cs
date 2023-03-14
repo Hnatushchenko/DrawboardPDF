@@ -12,5 +12,6 @@ namespace DrawboardPDFApp.Services
     {
         Task<IEnumerable<StorageFile>> GetAllPdfFilesAsync();
         Task AddFileAsync(StorageFile file);
+        Task RemoveFileAsync(string name);
     }
 }

@@ -193,6 +193,13 @@ namespace DrawboardPDFApp.Services
             return exists;
         }
 
+        public async Task RemoveCloudFileAsync(string name)
+        {
+            var cloudRecord = CloudRecords.FirstOrDefault(record => record.DisplayName == name);
+            CloudRecords.Remove(cloudRecord);
+            await cloudStorage.RemoveFileAsync(name);
+        }
+
         public async Task AddCloudRecordIfNotExistAsync(StorageFile file)
         {
             if (RecordExistsInCloud(file))
