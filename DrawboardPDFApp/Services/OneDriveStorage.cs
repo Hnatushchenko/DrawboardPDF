@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -99,9 +100,15 @@ namespace DrawboardPDFApp.Services
 
         public async Task RemoveFileAsync(string fileName)
         {
-            await graphServiceClient.Me.Drive.Root.ItemWithPath($"/{cloudFolderName}/{fileName}")
+            try
+            {
+                await graphServiceClient.Me.Drive.Root.ItemWithPath($"/{cloudFolderName}/{fileName}")
                 .Request()
                 .DeleteAsync();
+            }
+            catch (ServiceException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+            }
         }
     }
 }
